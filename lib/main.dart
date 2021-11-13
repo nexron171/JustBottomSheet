@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'JustBottomSheet Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         backgroundColor: Colors.white,
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'JustBottomSheet Example'),
     );
   }
 }
@@ -40,6 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -272,6 +276,7 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
                 child: Column(
                   children: [
                     SizedBox(
+                      key: const ValueKey("DraggableZone"),
                       height: handlerContainerHeight,
                       width: width,
                       child: DecoratedBox(
