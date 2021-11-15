@@ -1,79 +1,6 @@
+library just_bottom_sheet;
+
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'JustBottomSheet Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        backgroundColor: Colors.white,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-      ),
-      home: const MyHomePage(title: 'JustBottomSheet Example'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final scrollController = ScrollController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showBottomSheet(
-            context: context,
-            closeOnScroll: true,
-            cornerRadius: 32,
-            scrollController: scrollController,
-            builder: (context) {
-              return ListView.builder(
-                controller: scrollController,
-                itemBuilder: (context, row) {
-                  return Material(
-                    color: Colors.transparent,
-                    child: ListTile(
-                      title: Text("Row #$row"),
-                    ),
-                  );
-                },
-                itemCount: 99,
-              );
-            },
-          );
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
 
 Future<T?> showBottomSheet<T>({
   required BuildContext context,
@@ -123,7 +50,8 @@ class JustBottomSheetRoute<T> extends ModalRoute<T> {
   String? get barrierLabel => null;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return JustBottomSheetPage(
       height: MediaQuery.of(context).size.height,
       builder: builder,
@@ -136,11 +64,12 @@ class JustBottomSheetRoute<T> extends ModalRoute<T> {
   }
 
   @override
-  Widget buildTransitions(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     var begin = const Offset(0, 1);
     var end = Offset.zero;
-    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeOut));
+    var tween =
+        Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeOut));
     var offsetAnimation = animation.drive(tween);
 
     return SlideTransition(
@@ -190,7 +119,8 @@ class _ScrollMetrics {
   final double pixels;
 }
 
-class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerProviderStateMixin {
+class _JustBottomSheetPageState extends State<JustBottomSheetPage>
+    with TickerProviderStateMixin {
   bool isDragging = false;
   bool isClampingScroll = false;
   bool shouldPop = false;
@@ -276,10 +206,13 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
                   isDragging = true;
                 },
                 onVerticalDragUpdate: (details) {
-                  final newYOffset =
-                      details.globalPosition.dy - totalTopPadding - handlerPadding.top - handlerHeight / 2;
+                  final newYOffset = details.globalPosition.dy -
+                      totalTopPadding -
+                      handlerPadding.top -
+                      handlerHeight / 2;
 
-                  handleDragUpdates(offset: newYOffset, delta: details.delta.dy);
+                  handleDragUpdates(
+                      offset: newYOffset, delta: details.delta.dy);
                 },
                 onVerticalDragEnd: (details) {
                   isDragging = false;
@@ -287,7 +220,8 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
 
                   final velocity = details.primaryVelocity ?? 0;
 
-                  shouldPop = shouldPop && isVelocityEnoughToPop(velocity) || targetYOffset >= widget.height / 2;
+                  shouldPop = shouldPop && isVelocityEnoughToPop(velocity) ||
+                      targetYOffset >= widget.height / 2;
 
                   if (shouldPop && !willPop) {
                     willPop = true;
@@ -307,7 +241,8 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
                       width: width,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+                          color: widget.backgroundColor ??
+                              Theme.of(context).canvasColor,
                         ),
                         child: Center(
                           child: ClipRRect(
@@ -333,7 +268,9 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
     return Stack(
       children: [
         TweenAnimationBuilder<double>(
-          duration: isDragging || scrollPosition < 0 ? Duration.zero : const Duration(milliseconds: 250),
+          duration: isDragging || scrollPosition < 0
+              ? Duration.zero
+              : const Duration(milliseconds: 250),
           curve: Curves.linearToEaseOut,
           tween: Tween<double>(
             begin: previousYOffset,
@@ -360,12 +297,18 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
           child: backgroundBody,
         ),
         TweenAnimationBuilder<double>(
-          duration: isDragging ? Duration.zero : const Duration(milliseconds: 250),
+          duration:
+              isDragging ? Duration.zero : const Duration(milliseconds: 250),
           curve: Curves.linearToEaseOut,
           tween: Tween<double>(
-            begin:
-                widget.height - totalTopPadding - handlerContainerHeight - (scrollPosition < 0 ? 0 : previousYOffset),
-            end: widget.height - totalTopPadding - handlerContainerHeight - (scrollPosition < 0 ? 0 : targetYOffset),
+            begin: widget.height -
+                totalTopPadding -
+                handlerContainerHeight -
+                (scrollPosition < 0 ? 0 : previousYOffset),
+            end: widget.height -
+                totalTopPadding -
+                handlerContainerHeight -
+                (scrollPosition < 0 ? 0 : targetYOffset),
           ),
           builder: (context, value, child) {
             return Positioned(
@@ -393,9 +336,12 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage> with TickerPr
                             if (!widget.closeOnScroll) {
                               return false;
                             }
-                            final velocity = getScrollVelocityFromPixels(scroll.metrics.pixels);
+                            final velocity = getScrollVelocityFromPixels(
+                                scroll.metrics.pixels);
                             if (scroll.metrics.pixels <= 0) {
-                              if (isVelocityEnoughToPop(velocity) && !willPop && isPointerDown) {
+                              if (isVelocityEnoughToPop(velocity) &&
+                                  !willPop &&
+                                  isPointerDown) {
                                 willPop = true;
                                 // Navigator.of(context).pop();
                               }
