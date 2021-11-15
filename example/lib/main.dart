@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_bottom_sheet/just_bottom_sheet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showBottomSheet(
+          showJustBottomSheet(
             context: context,
             closeOnScroll: true,
             cornerRadius: 32,

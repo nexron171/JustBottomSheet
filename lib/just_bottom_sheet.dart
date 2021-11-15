@@ -2,7 +2,7 @@ library just_bottom_sheet;
 
 import 'package:flutter/material.dart';
 
-Future<T?> showBottomSheet<T>({
+Future<T?> showJustBottomSheet<T>({
   required BuildContext context,
   required Widget Function(BuildContext) builder,
   required ScrollController scrollController,
@@ -361,7 +361,12 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
                             }
                             return false;
                           },
-                          child: widget.builder(context),
+                          child: ScrollConfiguration(
+                            behavior: const ScrollBehavior().copyWith(
+                              physics: const BouncingScrollPhysics(),
+                            ),
+                            child: widget.builder(context),
+                          ),
                         ),
                       ),
                     ),

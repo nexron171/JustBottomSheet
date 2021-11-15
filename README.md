@@ -1,39 +1,26 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+***Just Bottom Sheet***
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
+<img src="https://devnex-2796b.web.app/just_bottom_sheet/example.gif" height="400"/>
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Bottom sheet with properly working nested scroll and swipe to close gesture.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- Highly customizable
+- Close only by drag handler or by drag handler and scroll
+- Supports any scrolls inside including slivers
+- More features soon
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+Just call function:
 
 ```dart
-const like = 'sample';
+showJustBottomSheet(...);
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+or you can present through your own route:
+```dart
+Navigator.of(context).push(YourRoute(builder: (context) {
+    return JustBottomSheetPage(...);
+}));
+```
