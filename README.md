@@ -1,3 +1,6 @@
+[![build](https://github.com/nexron171/JustBottomSheet/actions/workflows/tests.yml/badge.svg)](https://codecov.io/gh/nexron171/JustBottomSheet)
+[![codecov](https://codecov.io/gh/nexron171/JustBottomSheet/branch/master/graph/badge.svg?token=GGJMMAESDU)](https://codecov.io/gh/nexron171/JustBottomSheet)
+
 ***Just Bottom Sheet***
 
 <img src="https://devnex-2796b.web.app/just_bottom_sheet/example.gif" height="400"/>

@@ -1,4 +1,4 @@
-name: Widget_Tests
+name: Widget Tests
 
 on:
   push:
