@@ -42,10 +42,6 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [],
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showJustBottomSheet(
