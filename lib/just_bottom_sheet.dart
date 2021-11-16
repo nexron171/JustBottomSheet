@@ -112,13 +112,6 @@ class JustBottomSheetPage extends StatefulWidget {
   _JustBottomSheetPageState createState() => _JustBottomSheetPageState();
 }
 
-class _ScrollMetrics {
-  const _ScrollMetrics(this.timeStamp, this.pixels);
-
-  final int timeStamp;
-  final double pixels;
-}
-
 class _JustBottomSheetPageState extends State<JustBottomSheetPage>
     with TickerProviderStateMixin {
   bool isDragging = false;
@@ -135,7 +128,6 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
   final double scrollDistanceTolerance = 20;
   final double velocityToClose = 1500;
 
-  List<_ScrollMetrics> scrollMetrics = [];
   int lastScrollTimeStamp = 0;
 
   void handleDragUpdates({required double offset, required double delta}) {
@@ -314,7 +306,7 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
             return Positioned(
               bottom: 0,
               child: SizedBox(
-                key: const Key("ScrollBox"),
+                key: const Key("ScrollZone"),
                 width: width,
                 height: value,
                 child: Column(

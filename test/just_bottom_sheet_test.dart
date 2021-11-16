@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:just_bottom_sheet/just_bottom_sheet.dart';
 
 void main() {
+  const draggableZoneKey = Key("DraggableZone");
+  const scrollableZoneKey = Key("ScrollZone");
   group(
     'JustBottomSheet tests',
     () {
@@ -14,7 +16,7 @@ void main() {
           await tester.pumpAndSettle();
           final fab = await _openBottomSheet(tester);
 
-          final draggableZone = find.byKey(const Key("DraggableZone"));
+          final draggableZone = find.byKey(draggableZoneKey);
           expect(fab.hitTestable(), findsNothing,
               reason: "FAB should be invisible");
           expect(draggableZone, findsOneWidget,
@@ -28,7 +30,7 @@ void main() {
           await tester.pumpAndSettle();
           final fab = await _openBottomSheet(tester);
 
-          final draggableZone = find.byKey(const Key("DraggableZone"));
+          final draggableZone = find.byKey(draggableZoneKey);
           expect(fab.hitTestable(), findsNothing,
               reason: "FAB should be invisible");
           expect(draggableZone, findsOneWidget,
@@ -46,13 +48,13 @@ void main() {
         },
       );
       testWidgets(
-        'fling on scroll to close bottom sheet',
+        'drag on scroll to close bottom sheet',
         (WidgetTester tester) async {
           await tester.pumpWidget(const _ExampleApp());
           await tester.pumpAndSettle();
           final fab = await _openBottomSheet(tester);
 
-          final scrollableZone = find.byKey(const Key("ScrollBox"));
+          final scrollableZone = find.byKey(scrollableZoneKey);
           expect(fab.hitTestable(), findsNothing,
               reason: "FAB should be invisible");
           expect(scrollableZone, findsOneWidget,
@@ -78,6 +80,76 @@ void main() {
             findsOneWidget,
             reason: "FAB should be visible",
           );
+        },
+      );
+      testWidgets(
+        'drag on graggable zone to pull up',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(const _ExampleApp());
+          await tester.pumpAndSettle();
+          final fab = await _openBottomSheet(tester);
+
+          final dragZone = find.byKey(draggableZoneKey);
+          expect(fab.hitTestable(), findsNothing,
+              reason: "FAB should be invisible");
+          expect(dragZone, findsOneWidget,
+              reason: "Bottom sheet should be opened");
+
+          await tester.timedDrag(
+            dragZone,
+            const Offset(0, -1000),
+            const Duration(milliseconds: 100),
+          );
+          expect(dragZone.hitTestable(), findsOneWidget);
+          await tester.pumpAndSettle();
+          expect(dragZone.hitTestable(), findsOneWidget);
+        },
+      );
+      testWidgets(
+        'drag on scroll up and down repeatedly - should not be closed',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(const _ExampleApp());
+          await tester.pumpAndSettle();
+          await _openBottomSheet(tester);
+
+          final scrollableZone = find.byKey(scrollableZoneKey);
+          expect(scrollableZone, findsOneWidget,
+              reason: "Bottom sheet should be opened");
+
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, 100),
+            const Duration(milliseconds: 200),
+          );
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, -200),
+            const Duration(milliseconds: 50),
+          );
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, 200),
+            const Duration(milliseconds: 200),
+          );
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, -200),
+            const Duration(milliseconds: 50),
+          );
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, 200),
+            const Duration(milliseconds: 200),
+          );
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, -200),
+            const Duration(milliseconds: 50),
+          );
+          await tester.pumpAndSettle();
+
+          expect(scrollableZone, findsOneWidget,
+              reason: "Bottom sheet should be opened");
         },
       );
     },

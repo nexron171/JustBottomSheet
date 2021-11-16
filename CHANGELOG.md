@@ -1,3 +1,7 @@
+## 1.0.2
+
+* 100% code coverage
+
 ## 1.0.1
 
 * Fixed analyzer warning
