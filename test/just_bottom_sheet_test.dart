@@ -152,6 +152,43 @@ void main() {
               reason: "Bottom sheet should be opened");
         },
       );
+      testWidgets(
+        'drag on scroll to close bottom sheet, but it should not close',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(const _ExampleApp(
+            closeOnScroll: false,
+          ));
+          await tester.pumpAndSettle();
+          final fab = await _openBottomSheet(tester);
+
+          final scrollableZone = find.byKey(scrollableZoneKey);
+          expect(fab.hitTestable(), findsNothing,
+              reason: "FAB should be invisible");
+          expect(scrollableZone, findsOneWidget,
+              reason: "Bottom sheet should be opened");
+
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, 200),
+            const Duration(milliseconds: 500),
+          );
+          await tester.pumpAndSettle();
+          expect(scrollableZone.hitTestable(), findsOneWidget);
+
+          await tester.timedDrag(
+            scrollableZone,
+            const Offset(0, 200),
+            const Duration(milliseconds: 80),
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            scrollableZone.hitTestable(),
+            findsOneWidget,
+            reason: "Scroll should be visible",
+          );
+        },
+      );
     },
   );
 }
@@ -166,7 +203,12 @@ Future<Finder> _openBottomSheet(WidgetTester tester) async {
 }
 
 class _ExampleApp extends StatefulWidget {
-  const _ExampleApp({Key? key}) : super(key: key);
+  const _ExampleApp({
+    this.closeOnScroll = true,
+    Key? key,
+  }) : super(key: key);
+
+  final bool closeOnScroll;
 
   @override
   State<_ExampleApp> createState() => _ExampleAppState();
@@ -187,7 +229,7 @@ class _ExampleAppState extends State<_ExampleApp> {
             onPressed: () {
               showJustBottomSheet(
                 context: context,
-                closeOnScroll: true,
+                closeOnScroll: widget.closeOnScroll,
                 cornerRadius: 32,
                 scrollController: scrollController,
                 builder: (context) {
