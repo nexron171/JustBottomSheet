@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:just_bottom_sheet/drag_zone_position.dart';
 import 'package:just_bottom_sheet/just_bottom_sheet.dart';
+import 'package:just_bottom_sheet/just_bottom_sheet_configuration.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,27 +48,38 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           showJustBottomSheet(
             context: context,
-            configuration: JustBottomSheetPageConfiguration(
-              height: MediaQuery.of(context).size.height,
-              builder: (context) {
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  controller: scrollController,
-                  itemBuilder: (context, row) {
-                    return Material(
-                      color: Colors.blueGrey,
-                      child: ListTile(
-                        title: Text("Row #$row"),
-                      ),
-                    );
-                  },
-                  itemCount: 25,
-                );
-              },
-              scrollController: scrollController,
-              closeOnScroll: true,
-              cornerRadius: 16,
+            dragZoneConfiguration: JustBottomSheetDragZoneConfiguration(
+              dragZonePosition: DragZonePosition.inside,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  height: 8,
+                  width: 50,
+                  color: Colors.grey,
+                ),
+              ),
             ),
+            configuration: JustBottomSheetPageConfiguration(
+                height: MediaQuery.of(context).size.height,
+                builder: (context) {
+                  return ListView.builder(
+                    padding: EdgeInsets.zero,
+                    controller: scrollController,
+                    itemBuilder: (context, row) {
+                      return Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          title: Text("Row #$row"),
+                        ),
+                      );
+                    },
+                    itemCount: 25,
+                  );
+                },
+                scrollController: scrollController,
+                closeOnScroll: true,
+                cornerRadius: 16,
+                backgroundColor: Colors.lightGreen),
           );
         },
         tooltip: 'Increment',

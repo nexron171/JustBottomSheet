@@ -3,102 +3,25 @@ library just_bottom_sheet;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:just_bottom_sheet/drag_zone_position.dart';
+import 'package:just_bottom_sheet/just_bottom_sheet_drag_zone.dart';
 
-Future<T?> showJustBottomSheet<T>({
-  required BuildContext context,
-  required JustBottomSheetPageConfiguration configuration,
-}) {
-  return Navigator.of(context).push<T>(
-    JustBottomSheetRoute(configuration: configuration),
-  );
-}
-
-class JustBottomSheetRoute<T> extends ModalRoute<T> {
-  JustBottomSheetRoute({
-    required this.configuration,
-  }) : super();
-
-  final JustBottomSheetPageConfiguration configuration;
-
-  @override
-  Color? get barrierColor => Colors.black.withOpacity(0.5);
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return JustBottomSheetPage(
-      configuration: configuration,
-    );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    var begin = const Offset(0, 1);
-    var end = Offset.zero;
-    var tween =
-        Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeOut));
-    var offsetAnimation = animation.drive(tween);
-
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
-    );
-  }
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 250);
-}
-
-class JustBottomSheetPageConfiguration {
-  const JustBottomSheetPageConfiguration({
-    required this.height,
-    required this.builder,
-    required this.scrollController,
-    this.dragZonePosition = DragZonePosition.inside,
-    this.closeOnScroll = false,
-    this.additionalTopPadding = 32,
-    this.backgroundColor,
-    this.handleBarColor,
-    this.cornerRadius,
-  });
-
-  final double height;
-  final bool closeOnScroll;
-  final Widget Function(BuildContext) builder;
-  final ScrollController scrollController;
-  final DragZonePosition dragZonePosition;
-  final double additionalTopPadding;
-  final Color? backgroundColor;
-  final Color? handleBarColor;
-  final double? cornerRadius;
-}
+import 'just_bottom_sheet_configuration.dart';
+import 'just_bottom_sheet_route.dart';
 
 class JustBottomSheetPage extends StatefulWidget {
   const JustBottomSheetPage({
     required this.configuration,
+    required this.dragZoneConfiguration,
     Key? key,
   }) : super(key: key);
 
   final JustBottomSheetPageConfiguration configuration;
+  final JustBottomSheetDragZoneConfiguration dragZoneConfiguration;
 
   @override
   _JustBottomSheetPageState createState() => _JustBottomSheetPageState();
 }
-
-enum DragZonePosition { inside, outside }
 
 class _JustBottomSheetPageState extends State<JustBottomSheetPage>
     with TickerProviderStateMixin {
@@ -136,6 +59,32 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
     return velocity >= velocityToClose;
   }
 
+  void onDragZoneDragStart(DragStartDetails details) {
+    targetYOffset = 0;
+    previousYOffset = 0;
+    isDragging = true;
+  }
+
+  void onDragZoneDragEnd(DragEndDetails details) {
+    isDragging = false;
+    bool shouldPop = this.shouldPop;
+
+    final velocity = details.primaryVelocity ?? 0;
+
+    shouldPop = shouldPop && isVelocityEnoughToPop(velocity) ||
+        targetYOffset >= widget.configuration.height / 2;
+
+    if (shouldPop && !willPop) {
+      willPop = true;
+      Navigator.of(context).pop();
+      return;
+    } else {
+      setState(() {
+        targetYOffset = 0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -150,87 +99,72 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
     const handlerPadding = EdgeInsets.all(8);
     const double handlerHeight = 8;
 
-    final Widget backgroundBody = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(widget.configuration.cornerRadius ?? 16),
-              topRight:
-                  Radius.circular(widget.configuration.cornerRadius ?? 16),
+    final Widget backgroundBody = Theme(
+      data: Theme.of(context).copyWith(
+        canvasColor: widget.configuration.backgroundColor,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.dragZoneConfiguration.dragZonePosition ==
+              DragZonePosition.outside)
+            JustBottomSheetDragZone(
+              dragZoneConfiguration: widget.dragZoneConfiguration.copyWith(
+                backgroundColor: Colors.transparent,
+              ),
+              onDragStart: onDragZoneDragStart,
+              onDragUpdate: (details) {
+                final newYOffset = details.globalPosition.dy -
+                    totalTopPadding -
+                    offsetCompensation -
+                    handlerPadding.top -
+                    handlerHeight / 2;
+
+                handleDragUpdates(
+                  offset: newYOffset,
+                  delta: details.delta.dy,
+                );
+              },
+              onDragEnd: onDragZoneDragEnd,
+              child: widget.dragZoneConfiguration.child,
             ),
-            child: Container(
-              color: widget.configuration.backgroundColor ??
-                  Theme.of(context).canvasColor,
-              child: GestureDetector(
-                onVerticalDragStart: (details) {
-                  targetYOffset = 0;
-                  previousYOffset = 0;
-                  isDragging = true;
-                },
-                onVerticalDragUpdate: (details) {
-                  final newYOffset = details.globalPosition.dy -
-                      totalTopPadding -
-                      offsetCompensation -
-                      handlerPadding.top -
-                      handlerHeight / 2;
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft:
+                    Radius.circular(widget.configuration.cornerRadius ?? 16),
+                topRight:
+                    Radius.circular(widget.configuration.cornerRadius ?? 16),
+              ),
+              child: Container(
+                color: widget.configuration.backgroundColor ??
+                    Theme.of(context).canvasColor,
+                child: widget.dragZoneConfiguration.dragZonePosition ==
+                        DragZonePosition.inside
+                    ? JustBottomSheetDragZone(
+                        dragZoneConfiguration: widget.dragZoneConfiguration,
+                        onDragStart: onDragZoneDragStart,
+                        onDragUpdate: (details) {
+                          final newYOffset = details.globalPosition.dy -
+                              totalTopPadding -
+                              offsetCompensation -
+                              handlerPadding.top -
+                              handlerHeight / 2;
 
-                  handleDragUpdates(
-                    offset: newYOffset,
-                    delta: details.delta.dy,
-                  );
-                },
-                onVerticalDragEnd: (details) {
-                  isDragging = false;
-                  bool shouldPop = this.shouldPop;
-
-                  final velocity = details.primaryVelocity ?? 0;
-
-                  shouldPop = shouldPop && isVelocityEnoughToPop(velocity) ||
-                      targetYOffset >= widget.configuration.height / 2;
-
-                  if (shouldPop && !willPop) {
-                    willPop = true;
-                    Navigator.of(context).pop();
-                    return;
-                  } else {
-                    setState(() {
-                      targetYOffset = 0;
-                    });
-                  }
-                },
-                child: Column(
-                  children: [
-                    SizedBox(
-                      key: const Key("DraggableZone"),
-                      height: handlerContainerHeight,
-                      width: width,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: widget.configuration.backgroundColor ??
-                              Theme.of(context).canvasColor,
-                        ),
-                        child: Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              height: handlerHeight,
-                              width: 50,
-                              color: widget.configuration.handleBarColor ??
-                                  Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                          handleDragUpdates(
+                            offset: newYOffset,
+                            delta: details.delta.dy,
+                          );
+                        },
+                        onDragEnd: onDragZoneDragEnd,
+                        child: widget.dragZoneConfiguration.child,
+                      )
+                    : null,
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
     return Stack(
@@ -347,4 +281,17 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
       ],
     );
   }
+}
+
+Future<T?> showJustBottomSheet<T>({
+  required BuildContext context,
+  required JustBottomSheetPageConfiguration configuration,
+  JustBottomSheetDragZoneConfiguration dragZoneConfiguration =
+      const JustBottomSheetDragZoneConfiguration(),
+}) {
+  return Navigator.of(context).push<T>(
+    JustBottomSheetRoute(
+        configuration: configuration,
+        dragZoneConfiguration: dragZoneConfiguration),
+  );
 }

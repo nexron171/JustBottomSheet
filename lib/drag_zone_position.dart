@@ -1,0 +1,1 @@
+enum DragZonePosition { inside, outside }

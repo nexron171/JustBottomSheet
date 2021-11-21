@@ -1,3 +1,9 @@
+## 1.1.0
+
+* Some code reorganization
+* Drag zone configuration - you can specify position of drag zone: inside of bottom sheet or outside
+* Availablity to specify custom handle bar widget
+
 ## 1.0.3
 
 * Changed close on scroll logic
