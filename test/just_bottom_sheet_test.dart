@@ -228,25 +228,27 @@ class _ExampleAppState extends State<_ExampleApp> {
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               showJustBottomSheet(
-                context: context,
-                closeOnScroll: widget.closeOnScroll,
-                cornerRadius: 32,
-                scrollController: scrollController,
-                builder: (context) {
-                  return ListView.builder(
-                    controller: scrollController,
-                    itemBuilder: (context, row) {
-                      return Material(
-                        color: Colors.transparent,
-                        child: ListTile(
-                          title: Text("Row #$row"),
-                        ),
+                  context: context,
+                  configuration: JustBottomSheetPageConfiguration(
+                    closeOnScroll: widget.closeOnScroll,
+                    cornerRadius: 32,
+                    scrollController: scrollController,
+                    height: MediaQuery.of(context).size.height,
+                    builder: (context) {
+                      return ListView.builder(
+                        controller: scrollController,
+                        itemBuilder: (context, row) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              title: Text("Row #$row"),
+                            ),
+                          );
+                        },
+                        itemCount: 99,
                       );
                     },
-                    itemCount: 99,
-                  );
-                },
-              );
+                  ));
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),

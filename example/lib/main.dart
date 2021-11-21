@@ -46,23 +46,27 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           showJustBottomSheet(
             context: context,
-            closeOnScroll: true,
-            cornerRadius: 32,
-            scrollController: scrollController,
-            builder: (context) {
-              return ListView.builder(
-                controller: scrollController,
-                itemBuilder: (context, row) {
-                  return Material(
-                    color: Colors.transparent,
-                    child: ListTile(
-                      title: Text("Row #$row"),
-                    ),
-                  );
-                },
-                itemCount: 99,
-              );
-            },
+            configuration: JustBottomSheetPageConfiguration(
+              height: MediaQuery.of(context).size.height,
+              builder: (context) {
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  controller: scrollController,
+                  itemBuilder: (context, row) {
+                    return Material(
+                      color: Colors.blueGrey,
+                      child: ListTile(
+                        title: Text("Row #$row"),
+                      ),
+                    );
+                  },
+                  itemCount: 25,
+                );
+              },
+              scrollController: scrollController,
+              closeOnScroll: true,
+              cornerRadius: 16,
+            ),
           );
         },
         tooltip: 'Increment',
