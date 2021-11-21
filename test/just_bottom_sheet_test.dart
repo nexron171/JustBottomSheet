@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:just_bottom_sheet/drag_zone_position.dart';
 
 import 'package:just_bottom_sheet/just_bottom_sheet.dart';
 import 'package:just_bottom_sheet/just_bottom_sheet_configuration.dart';
@@ -25,9 +26,35 @@ void main() {
         },
       );
       testWidgets(
-        'fling on draggable zone to close bottom sheet',
+        'fling on draggable zone inside to close bottom sheet',
         (WidgetTester tester) async {
           await tester.pumpWidget(const _ExampleApp());
+          await tester.pumpAndSettle();
+          final fab = await _openBottomSheet(tester);
+
+          final draggableZone = find.byKey(draggableZoneKey);
+          expect(fab.hitTestable(), findsNothing,
+              reason: "FAB should be invisible");
+          expect(draggableZone, findsOneWidget,
+              reason: "Bottom sheet should be opened");
+
+          await tester.fling(draggableZone, const Offset(0, 50), 500);
+          await tester.pumpAndSettle();
+          expect(draggableZone.hitTestable(), findsOneWidget);
+
+          await tester.fling(draggableZone, const Offset(0, 50), 1500);
+          await tester.pumpAndSettle();
+
+          expect(fab.hitTestable(), findsOneWidget,
+              reason: "FAB should be visible");
+        },
+      );
+      testWidgets(
+        'fling on draggable zone outside to close bottom sheet',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(const _ExampleApp(
+            dragZonePosition: DragZonePosition.outside,
+          ));
           await tester.pumpAndSettle();
           final fab = await _openBottomSheet(tester);
 
@@ -206,10 +233,12 @@ Future<Finder> _openBottomSheet(WidgetTester tester) async {
 class _ExampleApp extends StatefulWidget {
   const _ExampleApp({
     this.closeOnScroll = true,
+    this.dragZonePosition = DragZonePosition.inside,
     Key? key,
   }) : super(key: key);
 
   final bool closeOnScroll;
+  final DragZonePosition dragZonePosition;
 
   @override
   State<_ExampleApp> createState() => _ExampleAppState();
@@ -230,6 +259,9 @@ class _ExampleAppState extends State<_ExampleApp> {
             onPressed: () {
               showJustBottomSheet(
                   context: context,
+                  dragZoneConfiguration: JustBottomSheetDragZoneConfiguration(
+                    dragZonePosition: widget.dragZonePosition,
+                  ),
                   configuration: JustBottomSheetPageConfiguration(
                     closeOnScroll: widget.closeOnScroll,
                     cornerRadius: 32,
