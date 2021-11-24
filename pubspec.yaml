@@ -1,6 +1,6 @@
 name: just_bottom_sheet
 description: Just Bottom Sheet. Bottom sheet with properly working nested scroll and swipe to close gesture.
-version: 1.1.0
+version: 1.2.0
 homepage:
 repository: https://github.com/nexron171/JustBottomSheet
 

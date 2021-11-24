@@ -1,3 +1,8 @@
+## 1.2.0
+
+* Ability to use ImageFilter as background
+* Disabled scroll while dragging
+
 ## 1.1.0
 
 * Some code reorganization

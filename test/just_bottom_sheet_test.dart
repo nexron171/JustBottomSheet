@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_bottom_sheet/drag_zone_position.dart';
@@ -217,6 +219,57 @@ void main() {
           );
         },
       );
+      testWidgets('using blur causing transparent background for drag zone',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const _ExampleApp(
+          closeOnScroll: false,
+          useBlur: true,
+        ));
+        await tester.pumpAndSettle();
+        await _openBottomSheet(tester);
+        final draggableZoneBackground = find.byKey(
+          const Key("DraggableZoneBackground"),
+        );
+        final draggableZoneWidget =
+            tester.firstWidget(draggableZoneBackground) as DecoratedBox;
+        final decoration = draggableZoneWidget.decoration as BoxDecoration;
+
+        expect(decoration.color, Colors.transparent);
+      });
+      testWidgets('using blur causing transparent background for drag zone',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const _ExampleApp(
+          closeOnScroll: false,
+          useBlur: true,
+        ));
+        await tester.pumpAndSettle();
+        await _openBottomSheet(tester);
+        final draggableZoneBackground = find.byKey(
+          const Key("DraggableZoneBackground"),
+        );
+        final draggableZoneWidget =
+            tester.firstWidget(draggableZoneBackground) as DecoratedBox;
+        final decoration = draggableZoneWidget.decoration as BoxDecoration;
+
+        expect(decoration.color, Colors.transparent);
+      });
+      testWidgets('not using blur causing white background for drag zone',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const _ExampleApp(
+          closeOnScroll: false,
+          useBlur: false,
+        ));
+        await tester.pumpAndSettle();
+        await _openBottomSheet(tester);
+        final draggableZoneBackground = find.byKey(
+          const Key("DraggableZoneBackground"),
+        );
+        final draggableZoneWidget =
+            tester.firstWidget(draggableZoneBackground) as DecoratedBox;
+        final decoration = draggableZoneWidget.decoration as BoxDecoration;
+
+        expect(decoration.color, Colors.white, reason: "Color should be white");
+      });
     },
   );
 }
@@ -233,11 +286,13 @@ Future<Finder> _openBottomSheet(WidgetTester tester) async {
 class _ExampleApp extends StatefulWidget {
   const _ExampleApp({
     this.closeOnScroll = true,
+    this.useBlur = false,
     this.dragZonePosition = DragZonePosition.inside,
     Key? key,
   }) : super(key: key);
 
   final bool closeOnScroll;
+  final bool useBlur;
   final DragZonePosition dragZonePosition;
 
   @override
@@ -250,6 +305,7 @@ class _ExampleAppState extends State<_ExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(brightness: Brightness.light),
       home: Builder(builder: (context) {
         return Scaffold(
           appBar: AppBar(
@@ -267,6 +323,13 @@ class _ExampleAppState extends State<_ExampleApp> {
                     cornerRadius: 32,
                     scrollController: scrollController,
                     height: MediaQuery.of(context).size.height,
+                    backgroundImageFilter: widget.useBlur
+                        ? ImageFilter.blur(
+                            sigmaX: 0,
+                            sigmaY: 0,
+                          )
+                        : null,
+                    backgroundColor: Colors.white,
                     builder: (context) {
                       return ListView.builder(
                         controller: scrollController,

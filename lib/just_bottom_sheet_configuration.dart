@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'drag_zone_position.dart';
@@ -11,6 +13,7 @@ class JustBottomSheetPageConfiguration {
     this.additionalTopPadding = 32,
     this.backgroundColor,
     this.cornerRadius,
+    this.backgroundImageFilter,
   });
 
   final double height;
@@ -20,6 +23,7 @@ class JustBottomSheetPageConfiguration {
   final double additionalTopPadding;
   final Color? backgroundColor;
   final double? cornerRadius;
+  final ImageFilter? backgroundImageFilter;
 }
 
 class JustBottomSheetDragZoneConfiguration {

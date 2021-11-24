@@ -19,33 +19,30 @@ class JustBottomSheetDragZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: dragZoneConfiguration.backgroundColor ??
-          Theme.of(context).canvasColor,
-      child: GestureDetector(
-        onVerticalDragStart: onDragStart,
-        onVerticalDragUpdate: onDragUpdate,
-        onVerticalDragEnd: onDragEnd,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              key: const Key("DraggableZone"),
-              height: dragZoneConfiguration.height,
-              width: dragZoneConfiguration.width ??
-                  MediaQuery.of(context).size.width,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: dragZoneConfiguration.backgroundColor ??
-                      Theme.of(context).canvasColor,
-                ),
-                child: Center(
-                  child: child,
-                ),
+    return GestureDetector(
+      onVerticalDragStart: onDragStart,
+      onVerticalDragUpdate: onDragUpdate,
+      onVerticalDragEnd: onDragEnd,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            key: const Key("DraggableZone"),
+            height: dragZoneConfiguration.height,
+            width: dragZoneConfiguration.width ??
+                MediaQuery.of(context).size.width,
+            child: DecoratedBox(
+              key: const Key("DraggableZoneBackground"),
+              decoration: BoxDecoration(
+                color: dragZoneConfiguration.backgroundColor ??
+                    Theme.of(context).canvasColor,
+              ),
+              child: Center(
+                child: child,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

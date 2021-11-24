@@ -1,6 +1,7 @@
 library just_bottom_sheet;
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:just_bottom_sheet/drag_zone_position.dart';
@@ -99,186 +100,206 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
     const handlerPadding = EdgeInsets.all(8);
     const double handlerHeight = 8;
 
-    final Widget backgroundBody = Theme(
+    Widget backgroundChild = Builder(
+      builder: (context) {
+        return Container(
+          color: Theme.of(context).canvasColor,
+          child: widget.dragZoneConfiguration.dragZonePosition ==
+                  DragZonePosition.inside
+              ? JustBottomSheetDragZone(
+                  dragZoneConfiguration: widget.dragZoneConfiguration.copyWith(
+                    backgroundColor:
+                        widget.configuration.backgroundImageFilter == null
+                            ? widget.dragZoneConfiguration.backgroundColor
+                            : Colors.transparent,
+                  ),
+                  onDragStart: onDragZoneDragStart,
+                  onDragUpdate: (details) {
+                    final newYOffset = details.globalPosition.dy -
+                        totalTopPadding -
+                        offsetCompensation -
+                        handlerPadding.top -
+                        handlerHeight / 2;
+
+                    handleDragUpdates(
+                      offset: newYOffset,
+                      delta: details.delta.dy,
+                    );
+                  },
+                  onDragEnd: onDragZoneDragEnd,
+                  child: widget.dragZoneConfiguration.child,
+                )
+              : null,
+        );
+      },
+    );
+
+    final backgroundImageFilter = widget.configuration.backgroundImageFilter;
+    if (backgroundImageFilter != null) {
+      backgroundChild = BackdropFilter(
+        filter: backgroundImageFilter,
+        child: backgroundChild,
+      );
+    }
+
+    final Widget backgroundBody = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.dragZoneConfiguration.dragZonePosition ==
+            DragZonePosition.outside)
+          JustBottomSheetDragZone(
+            dragZoneConfiguration: widget.dragZoneConfiguration.copyWith(
+              backgroundColor: Colors.transparent,
+            ),
+            onDragStart: onDragZoneDragStart,
+            onDragUpdate: (details) {
+              final newYOffset = details.globalPosition.dy -
+                  totalTopPadding -
+                  offsetCompensation -
+                  handlerPadding.top -
+                  handlerHeight / 2;
+
+              handleDragUpdates(
+                offset: newYOffset,
+                delta: details.delta.dy,
+              );
+            },
+            onDragEnd: onDragZoneDragEnd,
+            child: widget.dragZoneConfiguration.child,
+          ),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(widget.configuration.cornerRadius ?? 16),
+              topRight:
+                  Radius.circular(widget.configuration.cornerRadius ?? 16),
+            ),
+            child: backgroundChild,
+          ),
+        ),
+      ],
+    );
+
+    return Theme(
       data: Theme.of(context).copyWith(
         canvasColor: widget.configuration.backgroundColor,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          if (widget.dragZoneConfiguration.dragZonePosition ==
-              DragZonePosition.outside)
-            JustBottomSheetDragZone(
-              dragZoneConfiguration: widget.dragZoneConfiguration.copyWith(
-                backgroundColor: Colors.transparent,
-              ),
-              onDragStart: onDragZoneDragStart,
-              onDragUpdate: (details) {
-                final newYOffset = details.globalPosition.dy -
-                    totalTopPadding -
-                    offsetCompensation -
-                    handlerPadding.top -
-                    handlerHeight / 2;
-
-                handleDragUpdates(
-                  offset: newYOffset,
-                  delta: details.delta.dy,
-                );
-              },
-              onDragEnd: onDragZoneDragEnd,
-              child: widget.dragZoneConfiguration.child,
+          TweenAnimationBuilder<double>(
+            duration: isDragging || scrollPosition < 0
+                ? Duration.zero
+                : const Duration(milliseconds: 250),
+            curve: Curves.linearToEaseOut,
+            tween: Tween<double>(
+              begin: previousYOffset,
+              end: targetYOffset,
             ),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft:
-                    Radius.circular(widget.configuration.cornerRadius ?? 16),
-                topRight:
-                    Radius.circular(widget.configuration.cornerRadius ?? 16),
-              ),
-              child: Container(
-                color: widget.configuration.backgroundColor ??
-                    Theme.of(context).canvasColor,
-                child: widget.dragZoneConfiguration.dragZonePosition ==
-                        DragZonePosition.inside
-                    ? JustBottomSheetDragZone(
-                        dragZoneConfiguration: widget.dragZoneConfiguration,
-                        onDragStart: onDragZoneDragStart,
-                        onDragUpdate: (details) {
-                          final newYOffset = details.globalPosition.dy -
-                              totalTopPadding -
-                              offsetCompensation -
-                              handlerPadding.top -
-                              handlerHeight / 2;
+            builder: (context, value, child) {
+              double height = widget.configuration.height - totalTopPadding;
 
-                          handleDragUpdates(
-                            offset: newYOffset,
-                            delta: details.delta.dy,
-                          );
-                        },
-                        onDragEnd: onDragZoneDragEnd,
-                        child: widget.dragZoneConfiguration.child,
-                      )
-                    : null,
-              ),
+              if (targetYOffset <= 0) {
+                height = height + value * -1;
+              } else {
+                height = height - value;
+              }
+
+              return Positioned(
+                bottom: 0,
+                child: SizedBox(
+                  width: width,
+                  height: max(0, height),
+                  child: child!,
+                ),
+              );
+            },
+            child: backgroundBody,
+          ),
+          TweenAnimationBuilder<double>(
+            duration:
+                isDragging ? Duration.zero : const Duration(milliseconds: 250),
+            curve: Curves.linearToEaseOut,
+            tween: Tween<double>(
+              begin: widget.configuration.height -
+                  totalTopPadding -
+                  handlerContainerHeight -
+                  (scrollPosition < 0 ? 0 : previousYOffset),
+              end: widget.configuration.height -
+                  totalTopPadding -
+                  handlerContainerHeight -
+                  (scrollPosition < 0 ? 0 : targetYOffset),
             ),
-          ),
-        ],
-      ),
-    );
-
-    return Stack(
-      children: [
-        TweenAnimationBuilder<double>(
-          duration: isDragging || scrollPosition < 0
-              ? Duration.zero
-              : const Duration(milliseconds: 250),
-          curve: Curves.linearToEaseOut,
-          tween: Tween<double>(
-            begin: previousYOffset,
-            end: targetYOffset,
-          ),
-          builder: (context, value, child) {
-            double height = widget.configuration.height - totalTopPadding;
-
-            if (targetYOffset <= 0) {
-              height = height + value * -1;
-            } else {
-              height = height - value;
-            }
-
-            return Positioned(
-              bottom: 0,
-              child: SizedBox(
-                width: width,
-                height: max(0, height),
-                child: child!,
-              ),
-            );
-          },
-          child: backgroundBody,
-        ),
-        TweenAnimationBuilder<double>(
-          duration:
-              isDragging ? Duration.zero : const Duration(milliseconds: 250),
-          curve: Curves.linearToEaseOut,
-          tween: Tween<double>(
-            begin: widget.configuration.height -
-                totalTopPadding -
-                handlerContainerHeight -
-                (scrollPosition < 0 ? 0 : previousYOffset),
-            end: widget.configuration.height -
-                totalTopPadding -
-                handlerContainerHeight -
-                (scrollPosition < 0 ? 0 : targetYOffset),
-          ),
-          builder: (context, value, child) {
-            return Positioned(
-              bottom: 0,
-              child: SizedBox(
-                key: const Key("ScrollZone"),
-                width: width,
-                height: max(0, value),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: Listener(
-                        onPointerDown: (_) {
-                          isPointerDown = true;
-                        },
-                        onPointerUp: (_) {
-                          isPointerDown = false;
-                          if (willPop) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: NotificationListener<ScrollUpdateNotification>(
-                          onNotification: (details) {
-                            if (!widget.configuration.closeOnScroll) {
-                              return false;
-                            }
-                            final delta =
-                                details.dragDetails?.primaryDelta?.abs() ?? 0;
-                            if (details.metrics.pixels <= 0) {
-                              if (delta > 30 && !willPop && isPointerDown) {
-                                willPop = true;
-                              }
-                              scrollPosition = details.metrics.pixels;
-                              handleDragUpdates(
-                                offset: scrollPosition * -1,
-                                delta: -1,
-                              );
-                            } else {
-                              willPop = false;
-                              if (targetYOffset != 0) {
-                                handleDragUpdates(
-                                  offset: 0,
-                                  delta: 1,
-                                );
-                              }
-                              scrollPosition = details.metrics.pixels;
-                            }
-                            return false;
+            builder: (context, value, child) {
+              return Positioned(
+                bottom: 0,
+                child: SizedBox(
+                  key: const Key("ScrollZone"),
+                  width: width,
+                  height: max(0, value),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Listener(
+                          onPointerDown: (_) {
+                            isPointerDown = true;
                           },
-                          child: ScrollConfiguration(
-                            behavior: const ScrollBehavior().copyWith(
-                              physics: const BouncingScrollPhysics(
-                                  parent: AlwaysScrollableScrollPhysics()),
+                          onPointerUp: (_) {
+                            isPointerDown = false;
+                            if (willPop) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: NotificationListener<ScrollUpdateNotification>(
+                            onNotification: (details) {
+                              if (!widget.configuration.closeOnScroll) {
+                                return false;
+                              }
+                              final delta =
+                                  details.dragDetails?.primaryDelta?.abs() ?? 0;
+                              if (details.metrics.pixels <= 0) {
+                                if (delta > 30 && !willPop && isPointerDown) {
+                                  willPop = true;
+                                }
+                                scrollPosition = details.metrics.pixels;
+                                handleDragUpdates(
+                                  offset: scrollPosition * -1,
+                                  delta: -1,
+                                );
+                              } else {
+                                willPop = false;
+                                if (targetYOffset != 0) {
+                                  handleDragUpdates(
+                                    offset: 0,
+                                    delta: 1,
+                                  );
+                                }
+                                scrollPosition = details.metrics.pixels;
+                              }
+                              return false;
+                            },
+                            child: ScrollConfiguration(
+                              behavior: const ScrollBehavior().copyWith(
+                                physics: BouncingScrollPhysics(
+                                  parent: isDragging
+                                      ? const NeverScrollableScrollPhysics()
+                                      : const AlwaysScrollableScrollPhysics(),
+                                ),
+                              ),
+                              child: widget.configuration.builder(context),
                             ),
-                            child: widget.configuration.builder(context),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-          child: backgroundBody,
-        ),
-      ],
+              );
+            },
+            child: backgroundBody,
+          ),
+        ],
+      ),
     );
   }
 }
