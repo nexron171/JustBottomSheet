@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Fixed main scroll behavior in case of horizontal nested scroll
+
 ## 1.2.0
 
 * Ability to use ImageFilter as background

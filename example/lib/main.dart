@@ -73,6 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: EdgeInsets.zero,
                   controller: scrollController,
                   itemBuilder: (context, row) {
+                    if (row == 5) {
+                      return const _NestedPageView();
+                    }
                     return Material(
                       color: Colors.transparent,
                       child: ListTile(
@@ -96,6 +99,63 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _NestedPageView extends StatefulWidget {
+  const _NestedPageView({Key? key}) : super(key: key);
+
+  @override
+  State<_NestedPageView> createState() => _NestedPageViewState();
+}
+
+class _NestedPageViewState extends State<_NestedPageView> {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: SizedBox(
+        height: 300,
+        child: PageView(
+          children: [
+            Container(
+              width: 300,
+              color: Colors.green,
+              child: const Center(
+                child: Text("green"),
+              ),
+            ),
+            Container(
+              width: 300,
+              color: Colors.red,
+              child: const Center(
+                child: Text("red"),
+              ),
+            ),
+            Container(
+              width: 300,
+              color: Colors.orange,
+              child: const Center(
+                child: Text("orange"),
+              ),
+            ),
+            Container(
+              width: 300,
+              color: Colors.amber,
+              child: const Center(
+                child: Text("amber"),
+              ),
+            ),
+            Container(
+              width: 300,
+              color: Colors.cyan,
+              child: const Center(
+                child: Text("cyan"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

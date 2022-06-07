@@ -252,6 +252,12 @@ class _JustBottomSheetPageState extends State<JustBottomSheetPage>
                           },
                           child: NotificationListener<ScrollUpdateNotification>(
                             onNotification: (details) {
+                              if (details.metrics.axisDirection ==
+                                      AxisDirection.left ||
+                                  details.metrics.axisDirection ==
+                                      AxisDirection.right) {
+                                return false;
+                              }
                               if (!widget.configuration.closeOnScroll) {
                                 return false;
                               }
